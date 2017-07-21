@@ -1,0 +1,33 @@
+Expect unix_socket_directories on RHEL's PostgreSQL 9.2
+
+If REDHAT_PGUPGRADE_FROM_RHEL is defined, (Red Hat only versions of) pg_upgrade
+are told to run the older server than 9.2 with unix_socket_directories instead
+of unix_socket_directory.  By default, even 9.2 is called with
+unix_socket_directory which breaks upgrade from RHSCL 9.2.
+
+diff --git a/src/bin/pg_upgrade/server.c b/src/bin/pg_upgrade/server.c
+index 3d041ef..a9c56e0 100644
+--- a/src/bin/pg_upgrade/server.c
++++ b/src/bin/pg_upgrade/server.c
+@@ -191,6 +191,12 @@ start_postmaster(ClusterInfo *cluster, bool throw_error)
+ 
+ 	static bool exit_hook_registered = false;
+ 
++	/* By default set to what upstream uses */
++	int			rh_sock_dir_split = 903;
++	if (getenv("REDHAT_PGUPGRADE_FROM_RHEL")) {
++		rh_sock_dir_split = 902;
++	}
++
+ 	if (!exit_hook_registered)
+ 	{
+ 		atexit(stop_postmaster_atexit);
+@@ -196,7 +202,7 @@ start_postmaster(ClusterInfo *cluster, bool throw_error)
+ 		snprintf(socket_string + strlen(socket_string),
+ 				 sizeof(socket_string) - strlen(socket_string),
+ 				 " -c %s='%s'",
+-				 (GET_MAJOR_VERSION(cluster->major_version) < 903) ?
++				 (GET_MAJOR_VERSION(cluster->major_version) < rh_sock_dir_split) ?
+ 				 "unix_socket_directory" : "unix_socket_directories",
+ 				 cluster->sockdir);
+ #endif
