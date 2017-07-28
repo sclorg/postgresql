@@ -68,7 +68,7 @@ Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 9.6
 Version: 9.6.3
-Release: 10%{?dist}
+Release: 11%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1229,6 +1229,10 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/libpgtypes.so
 %{_libdir}/libpq.so
 %{_libdir}/pgsql/pgxs/
+%if 0%{?scl:1}
+# https://bugzilla.redhat.com/show_bug.cgi?id=1431962
+%dir %{_libdir}/pkgconfig
+%endif
 %{_libdir}/pkgconfig/*.pc
 %{_mandir}/man1/ecpg.*
 %{_mandir}/man1/pg_config.*
@@ -1274,6 +1278,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Fri Jul 28 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.3-11
+- own pkgconfig dir in scls
+
 * Fri Jul 28 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.3-10
 - disable rpath in plperl/plpython (rhbz#1469431)
 
