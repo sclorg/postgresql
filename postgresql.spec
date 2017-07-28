@@ -68,7 +68,7 @@ Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 9.6
 Version: 9.6.3
-Release: 9%{?dist}
+Release: 10%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -379,7 +379,9 @@ benchmarks.
 %setup -q %{?scl:-n %{pkg_name}-%{version}} -a 12
 %patch1 -p1
 %patch2 -p1
+%if 0%{?rhel:1} && 0%{?rhel} <= 7
 %patch3 -p1
+%endif
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
@@ -515,9 +517,7 @@ unset PYTHON
 
 # Normal (not python3) build begins here
 
-# we want to build with rpath since LD_LIBRARY_PATH is not strong enough
-# for running pg_ctl under runuser command
-%configure \
+%configure --disable-rpath \
 %if %beta
 	--enable-debug \
 	--enable-cassert \
@@ -1274,6 +1274,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Fri Jul 28 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.3-10
+- disable rpath in plperl/plpython (rhbz#1469431)
+
 * Fri Jul 21 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.3-9
 - import into upstream repository
 
