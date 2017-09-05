@@ -67,8 +67,8 @@
 Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 9.6
-Version: 9.6.3
-Release: 11%{?dist}
+Version: 9.6.4
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -105,7 +105,6 @@ Patch3: postgresql-perl-rpath.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch7: postgresql-socket-dirs-pgupgrade.patch
-Patch8: postgresql-hstore-plperl-data-dumper.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -385,7 +384,6 @@ benchmarks.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
-%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -972,7 +970,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_bindir}/psql
 %{_bindir}/reindexdb
 %{_bindir}/vacuumdb
-%dir %{_libdir}/pgsql
 %{_mandir}/man1/clusterdb.*
 %{_mandir}/man1/createdb.*
 %{_mandir}/man1/createlang.*
@@ -1140,6 +1137,7 @@ make -C postgresql-setup-%{setup_version} check
 
 %files libs -f libs.lst
 %doc COPYRIGHT
+%dir %{_libdir}/pgsql
 %{_libdir}/libecpg.so.*
 %{_libdir}/libecpg_compat.so.*
 %{_libdir}/libpgtypes.so.*
@@ -1278,6 +1276,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Tue Sep 05 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.4-1
+- sync with rh-postgresql96
+
 * Fri Jul 28 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.3-11
 - own pkgconfig dir in scls
 
