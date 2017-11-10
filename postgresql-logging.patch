@@ -13,9 +13,9 @@ diff -Naur postgresql-9.1rc1.orig/src/backend/utils/misc/postgresql.conf.sample 
  					# into log files. Required to be on for
  					# csvlogs.
  					# (change requires restart)
-@@ -287,11 +287,11 @@
+@@ -355,11 +355,11 @@
  # These are only used if logging_collector is on:
- #log_directory = 'pg_log'		# directory where log files are written,
+ #log_directory = 'log'			# directory where log files are written,
  					# can be absolute or relative to PGDATA
 -#log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
 +log_filename = 'postgresql-%a.log'	# log file name pattern,
@@ -27,7 +27,7 @@ diff -Naur postgresql-9.1rc1.orig/src/backend/utils/misc/postgresql.conf.sample 
  					# same name as the new log file will be
  					# truncated rather than appended to.
  					# But such truncation only occurs on
-@@ -299,9 +299,9 @@
+@@ -367,9 +367,9 @@
  					# or size-driven rotation.  Default is
  					# off, meaning append to existing files
  					# in all cases.
