@@ -649,6 +649,24 @@ description     "Upgrade data from system PostgreSQL version (PostgreSQL $sys_pg
 $upgrade_hacks
 EOF
 
+# gen_scl_upgrade_config VERSION PREFIXES
+# ---------------------------------------
+gen_scl_upgrade_config ()
+{
+	pver=$1
+	for pfx in $2; do
+		name=${pfx}postgresql${pver//./}
+cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/$name.conf <<EOF
+id              $name-postgresql
+major           $pver
+data_default    /var/opt/rh/$name/lib/pgsql/data
+engine          /opt/rh/$name/root/usr/bin
+description     "Upgrade data from RHSCL PostgreSQL version (PostgreSQL $pver)"
+scls            "$name"
+EOF
+	done
+}
+
 cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/postgresql92.conf <<EOF
 id              postgresql92-postgresql
 major           9.2
@@ -659,32 +677,9 @@ scls            "postgresql92"
 redhat_sockets_hack yes
 EOF
 
-cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/rh-postgresql94.conf <<EOF
-id              rh-postgresql94-postgresql
-major           9.4
-data_default    /var/opt/rh/rh-postgresql94/lib/pgsql/data
-engine          /opt/rh/rh-postgresql94/root/usr/bin
-description     "Upgrade data from RHSCL PostgreSQL version (PostgreSQL 9.4)"
-scls            "rh-postgresql94"
-EOF
-
-cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/rh-postgresql95.conf <<EOF
-id              rh-postgresql95-postgresql
-major           9.5
-data_default    /var/opt/rh/rh-postgresql95/lib/pgsql/data
-engine          /opt/rh/rh-postgresql95/root/usr/bin
-description     "Upgrade data from RHSCL PostgreSQL version (PostgreSQL 9.5)"
-scls            "rh-postgresql95"
-EOF
-
-cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/rh-postgresql96.conf <<EOF
-id              rh-postgresql96-postgresql
-major           9.6
-data_default    /var/opt/rh/rh-postgresql96/lib/pgsql/data
-engine          /opt/rh/rh-postgresql96/root/usr/bin
-description     "Upgrade data from RHSCL PostgreSQL version (PostgreSQL 9.6)"
-scls            "rh-postgresql96"
-EOF
+for version in 9.4 9.5 9.6; do
+	gen_scl_upgrade_config "$version" "rh- sclo-"
+done
 
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
