@@ -67,8 +67,8 @@
 Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 9.6
-Version: 9.6.4
-Release: 1%{?dist}
+Version: 9.6.5
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,7 +76,7 @@ License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/
 
-%global setup_version 5.1
+%global setup_version 6.0
 
 %global service_name %{?scl_prefix}postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -179,7 +179,7 @@ Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 # - RHEL7 lib* plugins
 # - https://bugzilla.redhat.com/1464368 elsewhere
 # Filtering: https://fedoraproject.org/wiki/Packaging:AutoProvidesAndRequiresFiltering
-%if 0%{?rhel} <= 6
+%if 0%{?rhel} <= 6 && 0%{?fedora} == 0
 %filter_provides_in %{_libdir}/pgsql
 %filter_setup
 %else
@@ -1196,9 +1196,13 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_resetxlog.*
 %{_mandir}/man1/pg_rewind.*
 %{_mandir}/man1/postgres.*
+%if %systemd_build
+%{_mandir}/man1/postgresql-new-systemd-unit.*
+%endif
 %{_mandir}/man1/postgresql-setup.*
 %{_mandir}/man1/postmaster.*
 %if %systemd_build
+%{_sbindir}/postgresql-new-systemd-unit
 %{_tmpfilesdir}/%{?scl_prefix}postgresql.conf
 %{_unitdir}/*%{?scl_prefix}postgresql*.service
 %else
@@ -1276,8 +1280,12 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Fri Nov 10 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-2
+- fix CVE-2017-15097 by rebasing postgresql-setup to the latest version
+
 * Tue Sep 05 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.4-1
 - sync with rh-postgresql96
+- filter provides for Fedora
 
 * Fri Jul 28 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.3-11
 - own pkgconfig dir in scls
