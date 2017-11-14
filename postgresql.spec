@@ -68,7 +68,7 @@ Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 10
 Version: 10.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,7 +76,7 @@ License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/
 
-%global setup_version 6.0
+%global setup_version 7.0
 
 %global service_name %{?scl_prefix}postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -421,11 +421,7 @@ cd postgresql-setup-%{setup_version}
     pgdocdir=%{_pkgdocdir} \
     PGVERSION=%{version} \
     PGMAJORVERSION=%{majorversion} \
-%if 0%{?scl:1}
-    SCLS=%{?scl} \
-    NAME_SRV_PFX=%{?scl}- \
-    NAME_PKG_PFX=%{?scl}- \
-%endif
+    %{?scl:--with-scl} \
     NAME_DEFAULT_PREV_SERVICE=postgresql
 
 make %{?_smp_mflags}
@@ -732,7 +728,6 @@ install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/data
 # make sure /var/lib/pgsql also exists, see bz#1023113
 mkdir -p -m 700 $RPM_BUILD_ROOT%{?_root_localstatedir}/lib/pgsql
 # macros file is not yet ready for SCLs in postgresql-setup
-rm -r $RPM_BUILD_ROOT/%{macrosdir}/macros.postgresql
 %endif
 
 # backups of data go here...
@@ -1223,7 +1218,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/ecpg.*
 %{_mandir}/man1/pg_config.*
 %{_mandir}/man3/SPI_*
-%{?!scl:%{macrosdir}/*}
+%{macrosdir}/macros.%name
 
 %files static
 %{_libdir}/libpgcommon.a
@@ -1260,6 +1255,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Tue Nov 14 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-2
+- new postgresql-setup 7.0
+
 * Fri Nov 10 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-2
 - fix CVE-2017-15097 by rebasing postgresql-setup to the latest version
 
