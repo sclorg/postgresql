@@ -68,7 +68,7 @@ Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 10
 Version: 10.1
-Release: 2%{?dist}
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,7 +76,7 @@ License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/
 
-%global setup_version 7.0
+%global setup_version 8.0
 
 %global service_name %{?scl_prefix}postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -113,7 +113,7 @@ BuildRequires: perl-generators
 %endif
 BuildRequires: readline-devel zlib-devel
 %if %systemd_build
-BuildRequires: systemd-units
+BuildRequires: systemd-units systemd-devel
 %endif
 BuildRequires: util-linux
 # We don't have to take care of multilib in SCL.
@@ -123,7 +123,7 @@ BuildRequires: multilib-rpm-config
 BuildRequires: m4 elinks docbook-utils help2man
 
 %if %plpython
-BuildRequires: python-devel
+BuildRequires: python2-devel
 %endif
 
 %if %plpython3
@@ -443,57 +443,61 @@ export CFLAGS
 # distclean and do it again for the "normal" build.  Note that the installed
 # Makefile.global will reflect the python 2 build, which seems appropriate
 # since that's still considered the default plpython version.
+common_configure_options='
+	--disable-rpath
+%if %beta
+	--enable-debug
+	--enable-cassert
+%endif
+%if %plperl
+	--with-perl
+%endif
+%if %pltcl
+	--with-tcl
+	--with-tclconfig=%{?scl:%_root_libdir}%{!?scl:%_libdir} \
+%endif
+%if %ldap
+	--with-ldap
+%endif
+%if %ssl
+	--with-openssl
+%endif
+%if %pam
+	--with-pam
+%endif
+%if %kerberos
+	--with-gssapi
+%endif
+%if %uuid
+	--with-ossp-uuid
+%endif
+%if %xml
+	--with-libxml
+	--with-libxslt
+%endif
+%if %nls
+	--enable-nls
+%endif
+%if %sdt
+	--enable-dtrace
+%endif
+%if %selinux
+	--with-selinux
+%endif
+	--with-system-tzdata=%{?scl:%_root_datadir}%{!?scl:%_datadir}/zoneinfo \
+	--datadir=%_datadir/pgsql
+%if %systemd_build
+	--with-systemd
+%endif
+'
+
 %if %plpython3
 
 export PYTHON=/usr/bin/python3
 
 # These configure options must match main build
-%configure --disable-rpath \
-%if %beta
-	--enable-debug \
-	--enable-cassert \
-%endif
-%if %plperl
-	--with-perl \
-%endif
-%if %pltcl
-	--with-tcl \
-	--with-tclconfig=%{?scl:%_root_libdir}%{!?scl:%_libdir} \
-%endif
-%if %plpython3
-	--with-python \
-%endif
-%if %ldap
-	--with-ldap \
-%endif
-%if %ssl
-	--with-openssl \
-%endif
-%if %pam
-	--with-pam \
-%endif
-%if %kerberos
-	--with-krb5 \
-	--with-gssapi \
-%endif
-%if %uuid
-	--with-ossp-uuid \
-%endif
-%if %xml
-	--with-libxml \
-	--with-libxslt \
-%endif
-%if %nls
-	--enable-nls \
-%endif
-%if %sdt
-	--enable-dtrace \
-%endif
-%if %selinux
-	--with-selinux \
-%endif
-	--with-system-tzdata=%{?scl:%_root_datadir}%{!?scl:%_datadir}/zoneinfo \
-	--datadir=%{_datadir}/pgsql
+%configure $common_configure_options \
+	--with-python
 
 # Fortunately we don't need to build much except plpython itself.
 make %{?_smp_mflags} -C src/pl/plpython all
@@ -505,58 +509,15 @@ cp src/Makefile.global src/Makefile.global.python3
 
 make distclean
 
-%endif
+%endif # %%plpython3
 
 unset PYTHON
 
-# Normal (not python3) build begins here
-
-%configure --disable-rpath \
-%if %beta
-	--enable-debug \
-	--enable-cassert \
-%endif
-%if %plperl
-	--with-perl \
-%endif
-%if %pltcl
-	--with-tcl \
-	--with-tclconfig=%{?scl:%_root_libdir}%{!?scl:%_libdir} \
-%endif
+# Normal (python2) build begins here
+%configure $common_configure_options \
 %if %plpython
-	--with-python \
+	--with-python
 %endif
-%if %ldap
-	--with-ldap \
-%endif
-%if %ssl
-	--with-openssl \
-%endif
-%if %pam
-	--with-pam \
-%endif
-%if %kerberos
-	--with-krb5 \
-	--with-gssapi \
-%endif
-%if %uuid
-	--with-ossp-uuid \
-%endif
-%if %xml
-	--with-libxml \
-	--with-libxslt \
-%endif
-%if %nls
-	--enable-nls \
-%endif
-%if %sdt
-	--enable-dtrace \
-%endif
-%if %selinux
-	--with-selinux \
-%endif
-	--with-system-tzdata=%{?scl:%_root_datadir}%{!?scl:%_datadir}/zoneinfo \
-	--datadir=%_datadir/pgsql
 
 make %{?_smp_mflags} world
 
@@ -1161,9 +1122,10 @@ make -C postgresql-setup-%{setup_version} check
 %if %systemd_build
 %dir %{?scl:%_root_libexecdir}%{!?scl:%_libexecdir}/initscripts/legacy-actions/%{?scl_prefix}postgresql
 %{?scl:%_root_libexecdir}%{!?scl:%_libexecdir}/initscripts/legacy-actions/%{?scl_prefix}postgresql/*
+%else
+%{_libexecdir}/postgresql-ctl
 %endif
 %{_libexecdir}/postgresql-check-db-dir
-%{_libexecdir}/postgresql-ctl
 %dir %{_sysconfdir}/postgresql-setup
 %dir %{_sysconfdir}/postgresql-setup/upgrade
 %config %{_sysconfdir}/postgresql-setup/upgrade/*.conf
@@ -1255,6 +1217,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Thu Dec 21 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-1
+- sync with Fedora Rawhide
+
 * Tue Nov 14 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-2
 - new postgresql-setup 7.0
 
