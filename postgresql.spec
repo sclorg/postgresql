@@ -31,13 +31,20 @@
 %{?scl:%scl_package postgresql}
 
 %{!?beta:%global beta 0}
+
+%if 0%{?rhel}
+%if %rhel <= 7
+%{!?plpython:%global plpython 1}
+%{!?plpython3:%global plpython3 0}
+%else
+%{!?plpython:%global plpython 0}
+%{!?plpython3:%global plpython3 1}
+%endif
+%endif
+
 %{!?test:%global test 1}
 %{!?plpython:%global plpython 1}
-%if 0%{?fedora} > 12
 %{!?plpython3:%global plpython3 1}
-%else
-%{!?plpython3:%global plpython3 0}
-%endif
 %{!?pltcl:%global pltcl 1}
 %{!?plperl:%global plperl 1}
 %{!?ssl:%global ssl 1}
