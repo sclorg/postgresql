@@ -75,7 +75,7 @@ Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 10
 Version: 10.1
-Release: 1%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1223,7 +1223,7 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
-* Thu Dec 21 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-1
+* Thu Dec 21 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-3
 - sync with Fedora Rawhide
 - minor cleanup
 
