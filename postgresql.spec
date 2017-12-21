@@ -186,7 +186,7 @@ Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 # - RHEL7 lib* plugins
 # - https://bugzilla.redhat.com/1464368 elsewhere
 # Filtering: https://fedoraproject.org/wiki/Packaging:AutoProvidesAndRequiresFiltering
-%if 0%{?rhel} <= 6 && 0%{?fedora} == 0
+%if 0%{?rhel} && 0%{?rhel} <= 6
 %filter_provides_in %{_libdir}/pgsql
 %filter_setup
 %else
@@ -695,7 +695,6 @@ install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/data
 %if 0%{?scl:1}
 # make sure /var/lib/pgsql also exists, see bz#1023113
 mkdir -p -m 700 $RPM_BUILD_ROOT%{?_root_localstatedir}/lib/pgsql
-# macros file is not yet ready for SCLs in postgresql-setup
 %endif
 
 # backups of data go here...
@@ -1226,6 +1225,7 @@ make -C postgresql-setup-%{setup_version} check
 %changelog
 * Thu Dec 21 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-1
 - sync with Fedora Rawhide
+- minor cleanup
 
 * Tue Nov 14 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-2
 - new postgresql-setup 7.0
