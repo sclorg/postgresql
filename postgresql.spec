@@ -74,8 +74,8 @@
 Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 10
-Version: 10.1
-Release: 3%{?dist}
+Version: 10.3
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -786,7 +786,7 @@ find_lang_bins pltcl.lst pltcl
 
 %if 0%{?scl:1}
 server_binaries='initdb pg_basebackup pg_controldata pg_ctl pg_receivewal
-pg_recvlogical pg_resetxlog pg_rewind postgres postgresql-setup postmaster
+pg_recvlogical pg_resetwal pg_rewind postgres postgresql-setup postmaster
 '
 
 contrib_binaries='
@@ -1223,6 +1223,10 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Thu Mar 01 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-1
+- update to 10.3 per release notes:
+  https://www.postgresql.org/docs/10/static/release-10-3.html
+
 * Thu Dec 21 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-3
 - sync with Fedora Rawhide
 - minor cleanup
