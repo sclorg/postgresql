@@ -75,7 +75,7 @@ Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 10
 Version: 10.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -112,6 +112,7 @@ Patch3: postgresql-perl-rpath.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch7: postgresql-socket-dirs-pgupgrade.patch
+Patch8: postgresql-libpqwalreceiver-rpath.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -391,6 +392,7 @@ benchmarks.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
+%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1223,6 +1225,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Tue Mar 06 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-2
+- work-around linking issue with libpqwalreceiver.so (rhbz#1550567)
+
 * Thu Mar 01 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-1
 - update to 10.3 per release notes:
   https://www.postgresql.org/docs/10/static/release-10-3.html
