@@ -74,8 +74,8 @@
 Summary: PostgreSQL client programs
 Name: %{?scl_prefix}postgresql
 %global majorversion 10
-Version: 10.3
-Release: 2%{?dist}
+Version: 10.7
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -83,7 +83,7 @@ License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/
 
-%global setup_version 8.0
+%global setup_version 8.3
 
 %global service_name %{?scl_prefix}postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -112,8 +112,8 @@ Patch3: postgresql-perl-rpath.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch7: postgresql-socket-dirs-pgupgrade.patch
-Patch8: postgresql-libpqwalreceiver-rpath.patch
 
+BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
 %if 0%{?fedora} || 0%{?rhel} > 7
@@ -392,7 +392,6 @@ benchmarks.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
-%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -520,13 +519,15 @@ make distclean
 
 %endif # %%plpython3
 
-unset PYTHON
+PYTHON=/usr/bin/python2
 
 # Normal (python2) build begins here
 %configure $common_configure_options \
 %if %plpython
 	--with-python
 %endif
+
+unset PYTHON
 
 make %{?_smp_mflags} world
 
@@ -1119,7 +1120,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/tsearch_data/
 %dir %{_datadir}/postgresql-setup
 %{_datadir}/postgresql-setup/library.sh
-%{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
 %{_libdir}/pgsql/*_and_*.so
 %{_libdir}/pgsql/dict_snowball.so
 %{_libdir}/pgsql/euc2004_sjis2004.so
@@ -1174,6 +1174,7 @@ make -C postgresql-setup-%{setup_version} check
 %files devel -f devel.lst
 %{_bindir}/ecpg
 %{_bindir}/pg_config
+%{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
 %{_includedir}/*
 %{_libdir}/libecpg.so
 %{_libdir}/libecpg_compat.so
@@ -1189,6 +1190,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_config.*
 %{_mandir}/man3/SPI_*
 %{macrosdir}/macros.%name
+%{macrosdir}/macros.%name-test
 
 %files static
 %{_libdir}/libpgcommon.a
@@ -1225,6 +1227,15 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Thu Feb 21 2019 Pavel Raiskup <praiskup@redhat.com> - 10.7-1
+- update to 10.7
+- explicitly set PYTHON=python2, /bin/python doesn't exist fc29+
+- updated postgresql-setup (tests macros moved to specific macro file)
+- explicitly BR gcc (news for Fedora)
+- drop postgresql-libpqwalreceiver-rpath.patch - this is resolved by new
+  postgresql-setup release (the patch was incorrect fix)
+- postgresql_pkg_tests.sh moved to *-devel
+
 * Tue Mar 06 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-2
 - work-around linking issue with libpqwalreceiver.so (rhbz#1550567)
 
